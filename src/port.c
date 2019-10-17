@@ -333,60 +333,11 @@ static double* check_gv(SEXP gr, SEXP hs, SEXP rho, int n, double *gv, double *h
     return gv;
 }
 
-void print_fval(FILE *fid, char name[], double val[], int len) {
-    fprintf(fid, "[%s:]", name);
-    int i;
-    for(i = 0; i < len - 1; i++) {
-        fprintf(fid, "%.2f, ", val[i]);
-    }
-    fprintf(fid, "%.2f\n", val[i+1]);
-}
-
-void print_dval(FILE *fid, char name[], int val[], int len) {
-    fprintf(fid, "[%s:]", name);
-    int i;
-    for(i = 0; i < len - 1; i++) {
-        fprintf(fid, "%d, ", val[i]);
-    }
-    fprintf(fid, "%d\n", val[i+1]);
-}
-
-void show_vals(SEXP vals, int len) {
-    for (int i = 0; i < len; i++) 
-        printf("%.2f, ", REAL(vals)[i]);
-    printf("\n");
-}
-
-void show_vals_int(SEXP vals, int len) {
-    for (int i = 0; i < len; i++) 
-        printf("%d, ", INTEGER(vals)[i]);
-    printf("\n");
-}
-
 
 void nlminb_iterate(double b[], double d[], double fx, double g[], double h[],
            int iv[], int liv, int lv, int n, double v[], double x[])
 {
-    FILE *fid = NULL;
-    printf("nlminb_iterate ...\n");
-    fid = fopen("nlminb_iterate.txt", "a+");
-
-    fprintf(fid, "nlminb_iterate ...\n\n");
-
-    // print_fval(fid, "b" , b, n*2);
-    // print_fval(fid, "d" , d, n);
     
-    print_fval(fid, "x", x, n);
-    fprintf(fid, "obj(x) = %.4f...\n", fx);
-
-    if (g) fprintf(fid, "grad exist\n");
-    if (h) fprintf(fid, "hess exist\n");
-
-    print_dval(fid, "iv", iv, liv);
-    print_fval(fid, "v" , v, lv);
-    // print_fval(fid, "x" , x, n);
-    fclose(fid);
-
     // main 
     int lh = (n * (n + 1))/2;
     if (b) {
@@ -406,11 +357,6 @@ void nlminb_iterate(double b[], double d[], double fx, double g[], double h[],
     }
 }
 
-// void port_ivset2(int kind, int iv[], int v)
-// {
-//     // Rf_divset(, INTEGER(iv), LENGTH(iv), LENGTH(v), REAL(v));
-//     // return R_NilValue;
-// }
 
 SEXP port_ivset(SEXP kind, SEXP iv, SEXP v)
 {
@@ -458,19 +404,13 @@ SEXP port_nlminb(SEXP fn, SEXP gr, SEXP hs, SEXP rho,
         } else error(_("'lower' and 'upper' must be numeric vectors"));
     }
     if (gr != R_NilValue) {
-        Rprintf("grad is not null\n");
+        // Rprintf("grad is not null\n");
 
         g = (double *)R_alloc(n, sizeof(double));
         if (hs != R_NilValue)
             h = (double *)R_alloc((n * (n + 1))/2, sizeof(double));
-    } else {
-        Rprintf("grad is null\n");
-    }
-
-    if (g) Rprintf("grad exist\n");
-    if (h) Rprintf("hess exist\n");
-
-    // print_fval(fid, "boundary", b, 2*n);
+    } 
+    
     do {
         nlminb_iterate( 
             b, REAL(d), fx, g, h, 
@@ -486,10 +426,6 @@ SEXP port_nlminb(SEXP fn, SEXP gr, SEXP hs, SEXP rho,
                 fx = R_PosInf;
             }
         }
-
-        // show_vals(xpt, n);
-        // show_vals_int(iv , LENGTH(iv));
-        // show_vals(v  , LENGTH(v));
 
         /* duplicate .par value again in case a callback has stored
            value (package varComp does this) */

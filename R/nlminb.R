@@ -34,10 +34,23 @@
 #' error for the gradient and Hessian, and such values for function
 #' evaluation are replaced by `+Inf` with a warning.
 #'
-#' @example man/examples/ex-nlminb.R
+#' @return A list with components:
+#' - `par`: The best set of parameters found.
+#' - `objective`: The value of `objective` corresponding to `par`.
+#' - `convergence`: An integer code. `0` indicates successful convergence.
 #'
+#' - `message`:
+#'   A character string giving any additional information returned by the
+#'   optimizer, or `NULL`. For details, see PORT documentation.
+#'
+#' - `iterations`: Number of iterations performed.
+#' - `evaluations`: Number of objective function and gradient function evaluations
+#'
+#' @example man/examples/ex-nlminb.R
+#' 
+#' @seealso [stats::nlminb()]
 #' @export
-nlminb <- function (start, objective, gradient = NULL, hessian = NULL,
+nlminb2 <- function (start, objective, gradient = NULL, hessian = NULL,
                     ..., scale = 1, control = list(), lower = -Inf, upper = Inf)
 {
     par <- setNames(as.double(start), names(start))
@@ -62,6 +75,7 @@ nlminb <- function (start, objective, gradient = NULL, hessian = NULL,
         }
         ivpars <- pos <= 4
         vpars <- !ivpars
+        browser()
         if (any(ivpars))
             iv[port_cpos[pos[ivpars]]] <- as.integer(unlist(control[ivpars]))
         if (any(vpars))
@@ -153,47 +167,32 @@ port_get_named_v <- function(v) {
     setNames(v[port_v_nms], names(port_v_nms))
 }
 
-# % see PR#15052.
-# \value{
-#   A list with components:
-#   \item{par}{The best set of parameters found.}
-#   \item{objective}{The value of \code{objective} corresponding to \code{par}.}
-#   \item{convergence}{An integer code. \code{0} indicates successful
-#     convergence.
-#   }
-#   \item{message}{
-#     A character string giving any additional information returned by the
-#     optimizer, or \code{NULL}. For details, see PORT documentation.
-#   }
-#   \item{iterations}{Number of iterations performed.}
-#   \item{evaluations}{Number of objective function and gradient function evaluations}
-# }
-# \section{Control parameters}{
+# \section{Control parameters`:
 #   Possible names in the \code{control} list and their default values
 #   are:
 #   \describe{
-#     \item{\code{eval.max}}{Maximum number of evaluations of the objective
+#     - `\code{eval.max}`: Maximum number of evaluations of the objective
 #       function allowed.  Defaults to 200.}% MXFCAL
-#     \item{\code{iter.max}}{Maximum number of iterations allowed.
+#     - `\code{iter.max}`: Maximum number of iterations allowed.
 #       Defaults to 150.}% MXITER
-#     \item{\code{trace}}{The value of the objective function and the parameters
+#     - `\code{trace}`: The value of the objective function and the parameters
 #       is printed every trace'th iteration.  Defaults to 0 which
 #       indicates no trace information is to be printed.}
-#     \item{\code{abs.tol}}{Absolute tolerance.  Defaults
+#     - `\code{abs.tol}`: Absolute tolerance.  Defaults
 #       to 0 so the absolute convergence test is not used.  If the objective
 #       function is known to be non-negative, the previous default of
 #       \code{1e-20} would be more appropriate.}% AFCTOL  31
-#     \item{\code{rel.tol}}{Relative tolerance.  Defaults to
+#     - `\code{rel.tol}`: Relative tolerance.  Defaults to
 #       \code{1e-10}.}% RFCTOL  32
-#     \item{\code{x.tol}}{X tolerance.  Defaults to \code{1.5e-8}.}% XCTOL  33
-#     \item{\code{xf.tol}}{false convergence tolerance.  Defaults to
+#     - `\code{x.tol}`: X tolerance.  Defaults to \code{1.5e-8}.}% XCTOL  33
+#     - `\code{xf.tol}`: false convergence tolerance.  Defaults to
 #       \code{2.2e-14}.}% XFTOL  34
-#     \item{\code{step.min, step.max}}{Minimum and maximum step size.  Both
+#     - `\code{step.min, step.max}`: Minimum and maximum step size.  Both
 #       default to \code{1.}.}% LMAX0 35  /  LMAXS 36
-#     \item{sing.tol}{singular convergence tolerance; defaults to
+#     - `sing.tol`: singular convergence tolerance; defaults to
 #       \code{rel.tol}.}% SCTOL  37
-#     \item{scale.init}{...}% DINIT  38
-#     \item{diff.g}{an estimated bound on the relative error in the
+#     - `scale.init`: ...}% DINIT  38
+#     - `diff.g`: an estimated bound on the relative error in the
 #       objective function value.}% ETA0  42
 #   }
 # }
